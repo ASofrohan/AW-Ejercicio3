@@ -18,15 +18,15 @@ session_start();
 <div id="contenedor">
 
 <?php
-	require("./includes/comun/cabecera.php");
-	require("./includes/comun/sidebarIzq.php");
+	require("includes/cabecera.php");
+	require("includes/sidebarIzq.php");
 ?>
 
 <main>
 	<article>
 		<h1>Acceso al sistema</h1>
 
-		<form action="./includes/sesion/procesarLogin.php" method="POST">
+		<form action="procesarLogin.php" method="POST">
 		<fieldset>
             <legend>Usuario y contraseña</legend>
             <div class="grupo-control">
@@ -41,8 +41,8 @@ session_start();
 </main>
 
 <?php
-	require("./includes/comun/sidebarDer.php");
-	require("./includes/comun/pie.php");
+	require("includes/sidebarDer.php");
+	require("includes/pie.php");
 ?>
 </div>
 

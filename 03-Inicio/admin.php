@@ -1,6 +1,6 @@
 <?php
 
-//Inicio del procesamiento
+
 require './includes/config.php';
 
 $tituloPagina = 'Administrar';

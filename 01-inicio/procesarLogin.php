@@ -4,8 +4,7 @@
 session_start();
 
 if (! isset($_POST['login']) ) {
-	$login = '../../login.php';
-	header('Location: ' . $login);
+	header('Location: login.php');
 	exit();
 }
 
@@ -24,13 +23,17 @@ if ( empty($password) ) {
 }
 
 if (count($erroresFormulario) === 0) {
-	$conn= new \mysqli('localhost', 'root', '', 'ejercicio3');
+	/* Antes de hacer la conexion es necesario importar la base de datos de la carpeta mysql.
+	Después de la importacion hay que crear un usuario de mysql para la base de datos que 
+	llamaremos ejercicio3 y darle permisos para la base de datos. En caso de querer conectar con otro usuario
+	hay que cambiar los parámetros de conexión */
+	$conn= new \mysqli('localhost', 'ejercicio3', 'ejercicio3', 'ejercicio3');
 	if ( $conn->connect_errno ) {
 		echo "Error de conexión a la BD: (" . $conn->connect_errno . ") " . utf8_encode($conn->connect_error);
 		exit();
 	}
 	if ( ! $conn->set_charset("utf8mb4")) {
-		echo "Error al configurar la codificación de la BD: (" . $conn->errno . ") " . utf8_encode($tconn->error);
+		echo "Error al configurar la codificación de la BD: (" . $conn->errno . ") " . utf8_encode($conn->error);
 		exit();
 	}
 	
@@ -44,13 +47,14 @@ if (count($erroresFormulario) === 0) {
 			$fila = $rs->fetch_assoc();
 			if ( ! password_verify($password, $fila['password'])) {
 				$erroresFormulario[] = "El usuario o el password no coinciden";
+			} else {
+				$_SESSION['login'] = true;
+				$_SESSION['nombre'] = $fila['nombre']; //Capturamos el nombre real del usuario
+				$_SESSION['esAdmin'] = strcmp($fila['rol'], 'admin') == 0 ? true : false;
+				$rs->free(); //Antes de salir liberamos memoria
+				header('Location: index.php');
+				exit();
 			}
-			$_SESSION['login'] = true;
-			$_SESSION['nombre'] = $nombreUsuario;
-			$_SESSION['esAdmin'] = strcmp($fila['rol'], 'admin') == 0 ? true : false;
-			$index = '../../index.php';
-			header('Location: ' . $index);
-			exit();
 		}
 		$rs->free();
 	} else {
@@ -64,7 +68,7 @@ if (count($erroresFormulario) === 0) {
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="../../estilo.css" />
+<link rel="stylesheet" type="text/css" href="estilo.css" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Login</title>
 </head>
@@ -74,8 +78,8 @@ if (count($erroresFormulario) === 0) {
 <div id="contenedor">
 
 <?php
-	require("../comun/cabecera.php");
-	require("../comun/sidebarIzq.php");
+	require("includes/cabecera.php");
+	require("includes/sidebarIzq.php");
 ?>
 
 <main>
@@ -96,7 +100,7 @@ if (count($erroresFormulario) === 0) {
                 echo '</ul>';
             }
 	?>
-		<form action="./includes/sesion/procesarLogin.php" method="POST">
+		<form action="procesarLogin.php" method="POST">
 		<fieldset>
             <legend>Usuario y contraseña</legend>
             <div class="grupo-control">
@@ -115,8 +119,8 @@ if (count($erroresFormulario) === 0) {
 </main>
 
 <?php
-	require("../comun/sidebarDer.php");
-	require("../comun/pie.php");
+	require("includes/sidebarDer.php");
+	require("includes/pie.php");
 ?>
 </div>
 

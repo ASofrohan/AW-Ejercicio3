@@ -3,10 +3,10 @@
 session_start();
 
 if (! isset($_POST['registro']) ) {
-	$registro = '../../registro.php';
-	header('Location: ' . $registro);
+	header('Location: registro.php');
 	exit();
 }
+
 
 $erroresFormulario = array();
 
@@ -25,14 +25,17 @@ $password = isset($_POST['password']) ? $_POST['password'] : null;
 if ( empty($password) || mb_strlen($password) < 5 ) {
 	$erroresFormulario[] = "El password tiene que tener una longitud de al menos 5 caracteres.";
 }
-
 $password2 = isset($_POST['password2']) ? $_POST['password2'] : null;
 if ( empty($password2) || strcmp($password, $password2) !== 0 ) {
 	$erroresFormulario[] = "Los passwords deben coincidir";
 }
 
 if (count($erroresFormulario) === 0) {
-	$conn = new \mysqli('localhost', 'root', '', 'ejercicio3');
+	/* Antes de hacer la conexion es necesario importar la base de datos de la carpeta mysql.
+	Después de la importacion hay que crear un usuario de mysql para la base de datos que 
+	llamaremos ejercicio3 y darle permisos para la base de datos. En caso de querer conectar con otro usuario
+	hay que cambiar los parámetros de conexión */
+	$conn = new \mysqli('localhost', 'ejercicio3', 'ejercicio3', 'ejercicio3');
 	if ( $conn->connect_errno ) {
 		echo "Error de conexión a la BD: (" . $this->conn->connect_errno . ") " . utf8_encode($this->conn->connect_error);
 		exit();
@@ -56,9 +59,9 @@ if (count($erroresFormulario) === 0) {
 					, 'user');
 			if ( $conn->query($query) ) {
 				$_SESSION['login'] = true;
-				$_SESSION['nombre'] = $nombreUsuario;
-				$index = '../../index.php';
-				header('Location: ' . $index);
+				$_SESSION['nombre'] = $nombre; //Capturamos el nombre real del usuario
+				$rs->free();
+				header('Location: index.php');
 				exit();
 			} else {
 				echo "Error al insertar en la BD: (" . $conn->errno . ") " . utf8_encode($conn->error);
@@ -76,7 +79,7 @@ if (count($erroresFormulario) === 0) {
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="../../estilo.css" />
+<link rel="stylesheet" type="text/css" href="estilo.css" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Registro</title>
 </head>
@@ -86,8 +89,8 @@ if (count($erroresFormulario) === 0) {
 <div id="contenedor">
 
 <?php
-	require("../comun/cabecera.php");
-	require("../comun/sidebarIzq.php");
+	require("includes/cabecera.php");
+	require("includes/sidebarIzq.php");
 ?>
 
 <main>
@@ -124,8 +127,8 @@ if (count($erroresFormulario) > 0) {
 </main>
 
 <?php
-	require("../comun/sidebarDer.php");
-	require("../comun/pie.php");
+	require("includes/sidebarDer.php");
+	require("includes/pie.php");
 ?>
 
 

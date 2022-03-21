@@ -31,7 +31,11 @@ if ( empty($password2) || strcmp($password, $password2) !== 0 ) {
 }
 
 if (count($erroresFormulario) === 0) {
-	$conn = new \mysqli('localhost', 'root', '', 'ejercicio3');
+	/* Antes de hacer la conexion es necesario importar la base de datos de la carpeta mysql.
+	Después de la importacion hay que crear un usuario de mysql para la base de datos que 
+	llamaremos ejercicio3 y darle permisos para la base de datos. En caso de querer conectar con otro usuario
+	hay que cambiar los parámetros de conexión */
+	$conn = new \mysqli('localhost', 'ejercicio3', 'ejercicio3', 'ejercicio3');
 	if ( $conn->connect_errno ) {
 		echo "Error de conexión a la BD: (" . $this->conn->connect_errno . ") " . utf8_encode($this->conn->connect_error);
 		exit();
@@ -55,7 +59,8 @@ if (count($erroresFormulario) === 0) {
 					, 'user');
 			if ( $conn->query($query) ) {
 				$_SESSION['login'] = true;
-				$_SESSION['nombre'] = $nombreUsuario;
+				$_SESSION['nombre'] = $nombre; //Capturamos el nombre real del usuario
+				$rs->free();
 				header('Location: index.php');
 				exit();
 			} else {
@@ -70,47 +75,24 @@ if (count($erroresFormulario) === 0) {
 }
 
 ?>
-
-<!DOCTYPE html>
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="estilo.css" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>Registro</title>
-</head>
-
-<body>
-
-<div id="contenedor">
-
 <?php
-	require("includes/comun/cabecera.php");
-	require("includes/comun/sidebarIzq.php");
-?>
+$tituloPagina = 'ProcesarLogin';
 
+$contenidoPrincipal = register2();
+$contenidoPrincipal=<<<EOS
 <main>
 	<article>
 		<h1>Registro de usuario</h1>
 		
 		<form action="procesarRegistro.php" method="POST">	
-<?php
-if (count($erroresFormulario) > 0) {
-	echo '<ul class="errores">';
-}
-foreach($erroresFormulario as $error) {
-	echo "<li>$error</li>";
-}
-if (count($erroresFormulario) > 0) {
-	echo '</ul>';
-}
-?>		
+		
 		</ul>
 		<fieldset>
 			<div class="grupo-control">
-				<label>Nombre de usuario:</label> <input class="control" type="text" name="nombreUsuario" value="<?=$nombreUsuario ?>" />
+				<label>Nombre de usuario:</label> <input class="control" type="text" name="nombreUsuario" value="<?='$nombreUsuario' ?>" />
 			</div>
 			<div class="grupo-control">
-				<label>Nombre completo:</label> <input class="control" type="text" name="nombre" value="<?=$nombre ?>" />
+				<label>Nombre completo:</label> <input class="control" type="text" name="nombre" value="<?='$nombre' ?>" />
 			</div>
 			<div class="grupo-control">
 				<label>Password:</label> <input class="control" type="password" name="password" />
@@ -120,14 +102,19 @@ if (count($erroresFormulario) > 0) {
 		</fieldset>
 	</article>
 </main>
+EOS;
+require __DIR__.'/includes/plantillas/plantilla.php';
 
-<?php
-	require("includes/comun/sidebarDer.php");
-	require("includes/comun/pie.php");
-?>
-
-
-</div>
-
-</body>
-</html>
+function register2(){
+	
+	if (count($erroresFormulario) > 0) {
+		echo '<ul class="errores">';
+	}
+	foreach($erroresFormulario as $error) {
+		echo "<li>$error</li>";
+	}
+	if (count($erroresFormulario) > 0) {
+		echo '</ul>';
+	}
+	
+}?>

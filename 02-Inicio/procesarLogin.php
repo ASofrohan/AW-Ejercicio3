@@ -23,13 +23,17 @@ if ( empty($password) ) {
 }
 
 if (count($erroresFormulario) === 0) {
-	$conn= new \mysqli('localhost', 'root', '', 'ejercicio3');
+	/* Antes de hacer la conexion es necesario importar la base de datos de la carpeta mysql.
+	Después de la importacion hay que crear un usuario de mysql para la base de datos que 
+	llamaremos ejercicio3 y darle permisos para la base de datos. En caso de querer conectar con otro usuario
+	hay que cambiar los parámetros de conexión */
+	$conn= new \mysqli('localhost', 'ejercicio3', 'ejercicio3', 'ejercicio3');
 	if ( $conn->connect_errno ) {
 		echo "Error de conexión a la BD: (" . $conn->connect_errno . ") " . utf8_encode($conn->connect_error);
 		exit();
 	}
 	if ( ! $conn->set_charset("utf8mb4")) {
-		echo "Error al configurar la codificación de la BD: (" . $conn->errno . ") " . utf8_encode($tconn->error);
+		echo "Error al configurar la codificación de la BD: (" . $conn->errno . ") " . utf8_encode($conn->error);
 		exit();
 	}
 	
@@ -43,12 +47,14 @@ if (count($erroresFormulario) === 0) {
 			$fila = $rs->fetch_assoc();
 			if ( ! password_verify($password, $fila['password'])) {
 				$erroresFormulario[] = "El usuario o el password no coinciden";
+			} else {
+				$_SESSION['login'] = true;
+				$_SESSION['nombre'] = $fila['nombre']; //Capturamos el nombre real del usuario
+				$_SESSION['esAdmin'] = strcmp($fila['rol'], 'admin') == 0 ? true : false;
+				$rs->free(); //Antes de salir liberamos memoria
+				header('Location: index.php');
+				exit();
 			}
-			$_SESSION['login'] = true;
-			$_SESSION['nombre'] = $nombreUsuario;
-			$_SESSION['esAdmin'] = strcmp($fila['rol'], 'admin') == 0 ? true : false;
-			header('Location: index.php');
-			exit();
 		}
 		$rs->free();
 	} else {
@@ -58,27 +64,39 @@ if (count($erroresFormulario) === 0) {
 }
 
 ?>
-
-<!DOCTYPE html>
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="estilo.css" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>Login</title>
-</head>
-
-<body>
-
-<div id="contenedor">
-
 <?php
-	require("includes/comun/cabecera.php");
-	require("includes/comun/sidebarIzq.php");
-?>
+$tituloPagina = 'ProcesarLogin';
 
+$contenidoPrincipal = register();
+$contenidoPrincipal=<<<EOS
+//meter de alguna manera esto para que se muestre , o en la variable o por pantalla. con esto comentado funciona , pero esto deberia hacer algo
 <main>
 	<article>
+	
+		<form action="procesarLogin.php" method="POST">
+		<fieldset>
+            <legend>Usuario y contraseña</legend>
+            <div class="grupo-control">
+                <label>Nombre de usuario:</label> <input type="text" name="nombreUsuario" value="<?= '$nombreUsuario' ?>" />
+            </div>
+            <div class="grupo-control">
+                <label>Password:</label> <input type="password" name="password" value="<?= '$password' ?>" />
+            </div>
+            <div class="grupo-control"><button type="submit" name="login">Entrar</button></div>
+		</fieldset>
+		</form>
 	<?php
+		}
+	?>
+	</article>
+</main>
+EOS;
+//hasta aqui
+require __DIR__.'/includes/plantillas/plantilla.php';
+
+
+function register(){
+	
 		if (isset($_SESSION["login"])) {
 			echo "<h1>Bienvenido ". $_SESSION['nombre'] . "</h1>";
 			echo "<p>Usa el menú de la izquierda para navegar.</p>";
@@ -93,30 +111,6 @@ if (count($erroresFormulario) === 0) {
             if (count($erroresFormulario) > 0) {
                 echo '</ul>';
             }
-	?>
-		<form action="procesarLogin.php" method="POST">
-		<fieldset>
-            <legend>Usuario y contraseña</legend>
-            <div class="grupo-control">
-                <label>Nombre de usuario:</label> <input type="text" name="nombreUsuario" value="<?= $nombreUsuario ?>" />
-            </div>
-            <div class="grupo-control">
-                <label>Password:</label> <input type="password" name="password" value="<?= $password ?>" />
-            </div>
-            <div class="grupo-control"><button type="submit" name="login">Entrar</button></div>
-		</fieldset>
-		</form>
-	<?php
 		}
-	?>
-	</article>
-</main>
-
-<?php
-	require("includes/comun/sidebarDer.php");
-	require("includes/comun/pie.php");
-?>
-</div>
-
-</body>
-</html>
+	
+}?>

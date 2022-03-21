@@ -3,36 +3,38 @@
 //Inicio del procesamiento
 require './includes/config.php';
 
+
 if (! isset($_POST['login']) ) {
 	header('Location: login.php');
 	exit();
 }
 
-$tituloPagina = 'Login';
-
-$contenidoPrincipal = '';
 
 $erroresFormulario = array();
 
 $nombreUsuario = isset($_POST['nombreUsuario']) ? $_POST['nombreUsuario'] : null;
 
 if ( empty($nombreUsuario) ) {
-	$erroresFormulario['nombreUsuario'] = "El nombre de usuario no puede estar vacío";
+	$erroresFormulario[] = "El nombre de usuario no puede estar vacío";
 }
 
 $password = isset($_POST['password']) ? $_POST['password'] : null;
 if ( empty($password) ) {
-	$erroresFormulario['password'] = "El password no puede estar vacío.";
+	$erroresFormulario[] = "El password no puede estar vacío.";
 }
 
 if (count($erroresFormulario) === 0) {
-	$conn= new \mysqli('localhost', 'root', '', 'ejercicio3');
+	/* Antes de hacer la conexion es necesario importar la base de datos de la carpeta mysql.
+	Después de la importacion hay que crear un usuario de mysql para la base de datos que 
+	llamaremos ejercicio3 y darle permisos para la base de datos. En caso de querer conectar con otro usuario
+	hay que cambiar los parámetros de conexión */
+	$conn= new \mysqli('localhost', 'ejercicio3', 'ejercicio3', 'ejercicio3');
 	if ( $conn->connect_errno ) {
 		echo "Error de conexión a la BD: (" . $conn->connect_errno . ") " . utf8_encode($conn->connect_error);
 		exit();
 	}
 	if ( ! $conn->set_charset("utf8mb4")) {
-		echo "Error al configurar la codificación de la BD: (" . $conn->errno . ") " . utf8_encode($tconn->error);
+		echo "Error al configurar la codificación de la BD: (" . $conn->errno . ") " . utf8_encode($conn->error);
 		exit();
 	}
 	
@@ -46,12 +48,14 @@ if (count($erroresFormulario) === 0) {
 			$fila = $rs->fetch_assoc();
 			if ( ! password_verify($password, $fila['password'])) {
 				$erroresFormulario[] = "El usuario o el password no coinciden";
+			} else {
+				$_SESSION['login'] = true;
+				$_SESSION['nombre'] = $fila['nombre']; //Capturamos el nombre real del usuario
+				$_SESSION['esAdmin'] = strcmp($fila['rol'], 'admin') == 0 ? true : false;
+				$rs->free(); //Antes de salir liberamos memoria
+				header('Location: index.php');
+				exit();
 			}
-			$_SESSION['login'] = true;
-			$_SESSION['nombre'] = $nombreUsuario;
-			$_SESSION['esAdmin'] = strcmp($fila['rol'], 'admin') == 0 ? true : false;
-			header('Location: index.php');
-			exit();
 		}
 		$rs->free();
 	} else {
@@ -60,50 +64,54 @@ if (count($erroresFormulario) === 0) {
 	}
 }
 
-if (isset($_SESSION["login"])) {
-	$contenidoPrincipal .= <<<EOS
-	<h1>Bienvenido {$_SESSION[nombre]}</h1>
-	<p>Usa el menú de la izquierda para navegar.</p>
-	EOS;
-} else {
-	$contenidoPrincipal .= <<<EOS
-	<form action="procesarLogin.php" method="POST">
-	<h1>ERROR</h1>
-	EOS;
-	if (count($erroresFormulario) > 0) {
-		$contenidoPrincipal .= '<ul class="errores">';
-	}
-	foreach($erroresFormulario as $clave => $error) {
-		if (is_numeric($clave)) {
-			$contenidoPrincipal .= "<li>$error</li>";
+?>
+<?php
+$tituloPagina = 'ProcesarLogin';
+
+$contenidoPrincipal = register();
+$contenidoPrincipal=<<<EOS
+//meter de alguna manera esto para que se muestre , o en la variable o por pantalla. con esto comentado funciona , pero esto deberia hacer algo
+<main>
+	<article>
+	
+		<form action="procesarLogin.php" method="POST">
+		<fieldset>
+            <legend>Usuario y contraseña</legend>
+            <div class="grupo-control">
+                <label>Nombre de usuario:</label> <input type="text" name="nombreUsuario" value="<?= '$nombreUsuario' ?>" />
+            </div>
+            <div class="grupo-control">
+                <label>Password:</label> <input type="password" name="password" value="<?= '$password' ?>" />
+            </div>
+            <div class="grupo-control"><button type="submit" name="login">Entrar</button></div>
+		</fieldset>
+		</form>
+	<?php
 		}
-	}
-	if (count($erroresFormulario) > 0) {
-		$contenidoPrincipal .= '</ul>';
-	}
-
-	$errorNombreUsuario = '';
-	if (isset($erroresFormulario['nombreUsuario'])) {
-		$errorNombreUsuario = " <span class=\"error\">{$erroresFormulario[nombreUsuario]}</span>";
-	}
-	$errorPassword = '';
-	if (isset($erroresFormulario['password'])) {
-		$errorPassword = " <span class=\"error\">{$erroresFormulario[password]}</span>";
-	}
-	$contenidoPrincipal .= <<<EOS
-	<fieldset>
-		<legend>Usuario y contraseña</legend>
-		<div class="grupo-control">
-			<label>Nombre de usuario:</label> <input type="text" name="nombreUsuario" value="<?= $nombreUsuario ?>" />$errorNombreUsuario
-		</div>
-		<div class="grupo-control">
-			<label>Password:</label> <input type="password" name="password" value="<?= $password ?>" />$errorPassword
-		</div>
-		<div class="grupo-control"><button type="submit" name="login">Entrar</button></div>
-	</fieldset>
-	</form>
-	EOS;
-}
-
-
+	?>
+	</article>
+</main>
+EOS;
+//hasta aqui
 require __DIR__.'/includes/plantillas/plantilla.php';
+
+
+function register(){
+	
+		if (isset($_SESSION["login"])) {
+			echo "<h1>Bienvenido ". $_SESSION['nombre'] . "</h1>";
+			echo "<p>Usa el menú de la izquierda para navegar.</p>";
+		} else {
+			echo "<h1>ERROR</h1>";
+            if (count($erroresFormulario) > 0) {
+                echo '<ul class="errores">';
+            }
+            foreach($erroresFormulario as $error) {
+                echo "<li>$error</li>";
+            }
+            if (count($erroresFormulario) > 0) {
+                echo '</ul>';
+            }
+		}
+	
+}?>

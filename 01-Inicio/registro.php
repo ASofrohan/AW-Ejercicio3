@@ -18,15 +18,15 @@ session_start();
 <div id="contenedor">
 
 <?php
-	require("./includes/comun/cabecera.php");
-	require("./includes/comun/sidebarIzq.php");
+	require("includes/cabecera.php");
+	require("includes/sidebarIzq.php");
 ?>
 
 <main>
 	<article>
 		<h1>Registro de usuario</h1>
 
-		<form action="./includes/sesion/procesarRegistro.php" method="POST">
+		<form action="procesarRegistro.php" method="POST">
 		<fieldset>
 			<div class="grupo-control">
 				<label>Nombre de usuario:</label> <input class="control" type="text" name="nombreUsuario" />
@@ -44,8 +44,8 @@ session_start();
 	</article>
 </main>
 <?php
-	require("./includes/comun/sidebarDer.php");
-	require("./includes/comun/pie.php");
+	require("includes/sidebarDer.php");
+	require("includes/pie.php");
 ?>
 
 

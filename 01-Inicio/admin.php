@@ -18,21 +18,21 @@ session_start();
 <div id="contenedor">
 
 <?php
-	require("./includes/comun/cabecera.php");
-	require("./includes/comun/sidebarIzq.php");
+	require("includes/cabecera.php");
+	require("includes/sidebarIzq.php");
 ?>
 <main>
 	<article>
 	<?php
-		if (!isset($_SESSION["esAdmin"])) {
-	?>
-		<h1>Acceso denegado!</h1>
-		<p>No tienes permisos suficientes para administrar la web.</p>
-	<?php
-		} else {
+		if (isset($_SESSION["esAdmin"]) && $_SESSION["esAdmin"]) {
 	?>
 		<h1>Consola de administración</h1>
 		<p>Aquí estarían todos los controles de administración</p>
+	<?php
+		} else {
+	?>
+		<h1>Acceso denegado!</h1>
+		<p>No tienes permisos suficientes para administrar la web.</p>
 	<?php
 		}
 	?>
@@ -40,8 +40,8 @@ session_start();
 </main>
 <?php
 
-	require("./includes/comun/sidebarDer.php");
-	require("./includes/comun/pie.php");
+	require("includes/sidebarDer.php");
+	require("includes/pie.php");
 
 ?>
 </div>

@@ -3,25 +3,9 @@
 //Inicio del procesamiento
 session_start();
 
-?>
+$tituloPagina = 'Portada';
 
-<!DOCTYPE html>
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="estilo.css" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>Registro</title>
-</head>
-
-<body>
-
-<div id="contenedor">
-
-<?php
-	require("includes/comun/cabecera.php");
-	require("includes/comun/sidebarIzq.php");
-?>
-
+$contenidoPrincipal = <<<EOS
 <main>
 	<article>
 		<h1>Registro de usuario</h1>
@@ -43,13 +27,6 @@ session_start();
 		</form>
 	</article>
 </main>
-<?php
-	require("includes/comun/sidebarDer.php");
-	require("includes/comun/pie.php");
-?>
+EOS;
 
-
-</div>
-
-</body>
-</html>
+require __DIR__.'/includes/plantillas/plantilla.php';
