@@ -15,4 +15,5 @@ $contenidoPrincipal = <<<EOS
 <h1>Hasta pronto!</h1>
 EOS;
 
-use AW\includes\plantillas/plantilla.php';
+require __DIR__.'/includes/plantillas/plantilla.php';
+?>

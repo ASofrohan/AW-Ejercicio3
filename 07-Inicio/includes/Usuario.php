@@ -1,6 +1,5 @@
 <?php
-namespace AW;
-use AW\Aplicacion;
+namespace es\ucm\fdi\aw;
 
 class Usuario
 {

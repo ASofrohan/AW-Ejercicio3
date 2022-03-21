@@ -9,4 +9,5 @@ $contenidoPrincipal = <<<EOS
 <p> Aquí está el contenido público, visible para todos los usuarios. </p>
 EOS;
 
-use AW\includes\plantillas\plantilla;
+require __DIR__.'/includes/plantillas/plantilla.php';
+?>

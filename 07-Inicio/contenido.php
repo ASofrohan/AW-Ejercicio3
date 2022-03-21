@@ -20,4 +20,5 @@ if (!isset($_SESSION["login"])) {
 	EOS;
 }
 
-use AW\includes\plantillas\plantilla;
+require __DIR__.'/includes/plantillas/plantilla.php';
+?>

@@ -1,18 +1,12 @@
 <?php
-namespace AW;
+namespace es\ucm\fdi\aw;
 
-/**
- * Clase que mantiene el estado global de la aplicación.
- */
 class Aplicacion
 {
+	const ATTRIBUTO_SESSION_ATTRIBUTOS_PETICION = 'attsPeticion';
+
 	private static $instancia;
 	
-	/**
-	 * Permite obtener una instancia de <code>Aplicacion</code>.
-	 * 
-	 * @return Applicacion Obtiene la única instancia de la <code>Aplicacion</code>
-	 */
 	public static function getSingleton() {
 		if (  !self::$instancia instanceof self) {
 			self::$instancia = new self;
@@ -20,59 +14,30 @@ class Aplicacion
 		return self::$instancia;
 	}
 
-	/**
-	 * @var array Almacena los datos de configuración de la BD
-	 */
 	private $bdDatosConexion;
 	
-	/**
-	 * Almacena si la Aplicacion ya ha sido inicializada.
-	 * 
-	 * @var boolean
-	 */
 	private $inicializada = false;
 	
-	/**
-	 * @var \mysqli Conexión de BD.
-	 */
 	private $conn;
 	
-	/**
-	 * Evita que se pueda instanciar la clase directamente.
-	 */
 	private function __construct() {
 	}
 	
-	/**
-	 * Evita que se pueda utilizar el operador clone.
-	 */
 	public function __clone()
 	{
 		throw new Exception('No tiene sentido el clonado');
 	}
 
-
-	/**
-	 * Evita que se pueda utilizar serialize().
-	 */
 	public function __sleep()
 	{
 		throw new Exception('No tiene sentido el serializar el objeto');
 	}
 
-	/**
-	 * Evita que se pueda utilizar unserialize().
-	 */
 	public function __wakeup()
 	{
 		throw new Exception('No tiene sentido el deserializar el objeto');
 	}
-	
-	/**
-	 * Inicializa la aplicación.
-	 * 
-	 * @param array $bdDatosConexion datos de configuración de la BD
-	 */
+
 	public function init($bdDatosConexion)
 	{
         if ( ! $this->inicializada ) {
@@ -82,20 +47,14 @@ class Aplicacion
         }
 	}
 	
-	/**
-	 * Cierre de la aplicación.
-	 */
 	public function shutdown()
 	{
 	    $this->compruebaInstanciaInicializada();
-	    if ($this->conn !== null) {
+	    if ($this->conn !== null && ! $this->conn->connect_errno) {
 	        $this->conn->close();
 	    }
 	}
 	
-	/**
-	 * Comprueba si la aplicación está inicializada. Si no lo está muestra un mensaje y termina la ejecución.
-	 */
 	private function compruebaInstanciaInicializada()
 	{
 	    if (! $this->inicializada ) {
@@ -104,11 +63,6 @@ class Aplicacion
 	    }
 	}
 	
-	/**
-	 * Devuelve una conexión a la BD. Se encarga de que exista como mucho una conexión a la BD por petición.
-	 * 
-	 * @return \mysqli Conexión a MySQL.
-	 */
 	public function conexionBd()
 	{
 	    $this->compruebaInstanciaInicializada();
@@ -131,3 +85,4 @@ class Aplicacion
 		return $this->conn;
 	}
 }
+?>
